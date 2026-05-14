@@ -1,352 +1,627 @@
-
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Larissa Russell — L10 Dashboard</title>
 <style>
-*{box-sizing:border-box;margin:0;padding:0}
-body{font-family:var(--font-sans)}
-.dash{padding:1rem 0}
-.nav{display:flex;gap:8px;flex-wrap:wrap;margin-bottom:1.5rem;border-bottom:0.5px solid var(--color-border-tertiary);padding-bottom:1rem}
-.nav button{font-size:13px;padding:5px 12px;border-radius:var(--border-radius-md);border:0.5px solid var(--color-border-secondary);background:transparent;color:var(--color-text-secondary);cursor:pointer;transition:all .15s}
-.nav button.active{background:var(--color-background-secondary);color:var(--color-text-primary);border-color:var(--color-border-primary);font-weight:500}
-.section{display:none}.section.active{display:block}
-.section-header{display:flex;align-items:center;justify-content:space-between;margin-bottom:1rem}
-.section-title{font-size:16px;font-weight:500;color:var(--color-text-primary)}
-.section-timer{font-size:12px;color:var(--color-text-secondary);background:var(--color-background-secondary);padding:3px 10px;border-radius:var(--border-radius-md);border:0.5px solid var(--color-border-tertiary)}
-.add-btn{font-size:13px;padding:5px 12px;border-radius:var(--border-radius-md);border:0.5px solid var(--color-border-secondary);background:transparent;color:var(--color-text-secondary);cursor:pointer;display:flex;align-items:center;gap:6px}
-.add-btn:hover{background:var(--color-background-secondary)}
-.card{background:var(--color-background-primary);border:0.5px solid var(--color-border-tertiary);border-radius:var(--border-radius-lg);padding:1rem 1.25rem;margin-bottom:10px}
-.card-row{display:flex;align-items:flex-start;gap:10px}
-.card-main{flex:1;min-width:0}
-.card-meta{font-size:12px;color:var(--color-text-tertiary);margin-top:4px}
-.card-text{font-size:14px;color:var(--color-text-primary);line-height:1.5}
-.delete-btn{background:none;border:none;cursor:pointer;color:var(--color-text-tertiary);padding:2px;opacity:.5;flex-shrink:0;line-height:1}
-.delete-btn:hover{opacity:1}
-.badge{display:inline-block;font-size:11px;padding:2px 8px;border-radius:var(--border-radius-md);font-weight:500}
-.badge-pro{background:#EAF3DE;color:#27500A}
-.badge-per{background:#E6F1FB;color:#0C447C}
-.badge-pos{background:#EAF3DE;color:#27500A}
-.badge-neg{background:#FCEBEB;color:#791F1F}
-.badge-neu{background:#F1EFE8;color:#444441}
-.metric-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(160px,1fr));gap:10px;margin-bottom:1rem}
-.metric-card{background:var(--color-background-secondary);border-radius:var(--border-radius-md);padding:1rem;position:relative}
-.metric-label{font-size:12px;color:var(--color-text-secondary);margin-bottom:4px}
-.metric-value{font-size:22px;font-weight:500;color:var(--color-text-primary)}
-.metric-target{font-size:11px;color:var(--color-text-tertiary);margin-top:2px}
-.status-dot{width:8px;height:8px;border-radius:50%;position:absolute;top:12px;right:12px}
-.dot-green{background:#639922}.dot-yellow{background:#BA7517}.dot-red{background:#E24B4A}
-.rock-bar-wrap{background:var(--color-background-secondary);border-radius:4px;height:6px;margin:8px 0 4px;overflow:hidden}
-.rock-bar{height:6px;border-radius:4px;transition:width .3s}
-.rock-pct{font-size:11px;color:var(--color-text-secondary)}
-.rock-status{font-size:11px;padding:2px 8px;border-radius:var(--border-radius-md);border:0.5px solid;display:inline-flex;align-items:center;gap:4px;cursor:pointer;background:transparent}
-.rock-on{color:#3B6D11;border-color:#97C459}.rock-at{color:#854F0B;border-color:#EF9F27}.rock-off{color:#A32D2D;border-color:#F09595}
-.avatar{width:28px;height:28px;border-radius:50%;display:inline-flex;align-items:center;justify-content:center;font-size:11px;font-weight:500;background:#CECBF6;color:#3C3489;flex-shrink:0}
-.todo-row{display:flex;align-items:center;gap:10px;padding:8px 0;border-bottom:0.5px solid var(--color-border-tertiary)}
-.todo-row:last-child{border-bottom:none}
-.todo-check{width:16px;height:16px;border-radius:4px;border:1.5px solid var(--color-border-primary);cursor:pointer;flex-shrink:0;display:flex;align-items:center;justify-content:center}
-.todo-check.done{background:#639922;border-color:#639922}
-.todo-text{flex:1;font-size:14px;color:var(--color-text-primary)}
-.todo-text.done-text{text-decoration:line-through;color:var(--color-text-tertiary)}
-.todo-owner{font-size:11px;color:var(--color-text-secondary);flex-shrink:0}
-.todo-rolling{font-size:11px;background:#FAEEDA;color:#633806;padding:2px 7px;border-radius:var(--border-radius-md)}
-.issue-row{display:flex;align-items:flex-start;gap:10px;padding:10px 0;border-bottom:0.5px solid var(--color-border-tertiary)}
-.issue-row:last-child{border-bottom:none}
-.issue-prio{font-size:11px;padding:2px 8px;border-radius:var(--border-radius-md);flex-shrink:0;font-weight:500}
-.prio-high{background:#FCEBEB;color:#791F1F}.prio-med{background:#FAEEDA;color:#633806}.prio-low{background:#F1EFE8;color:#444441}
-.issue-seat{font-size:11px;color:var(--color-text-tertiary);margin-top:3px}
-.saved-tag{font-size:11px;color:var(--color-text-tertiary);opacity:0;transition:opacity .4s;margin-left:8px}
-.saved-tag.show{opacity:1}
-.modal-overlay{display:none;position:fixed;inset:0;background:rgba(0,0,0,.35);z-index:100;align-items:center;justify-content:center}
-.modal-overlay.open{display:flex}
-.modal{background:var(--color-background-primary);border:0.5px solid var(--color-border-secondary);border-radius:var(--border-radius-lg);padding:1.5rem;width:400px;max-width:92vw}
-.modal h3{font-size:16px;font-weight:500;margin-bottom:1rem;color:var(--color-text-primary)}
-.modal label{font-size:13px;color:var(--color-text-secondary);display:block;margin-bottom:4px;margin-top:10px}
-.modal input,.modal select,.modal textarea{width:100%;font-size:14px}
-.modal textarea{height:70px;resize:vertical}
-.modal-footer{display:flex;justify-content:flex-end;gap:8px;margin-top:1.25rem}
-.modal-footer button{font-size:13px;padding:6px 16px;border-radius:var(--border-radius-md);border:0.5px solid var(--color-border-secondary);background:transparent;cursor:pointer;color:var(--color-text-primary)}
-.modal-footer .primary{background:var(--color-text-primary);color:var(--color-background-primary);border-color:var(--color-text-primary)}
-.empty{font-size:13px;color:var(--color-text-tertiary);padding:1.5rem 0;text-align:center}
-select option{background:var(--color-background-primary);color:var(--color-text-primary)}
-.ts{font-size:11px;color:var(--color-text-tertiary)}
+*, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+:root {
+  --bg: #ffffff; --bg2: #f6f6f3; --bg3: #eeecea;
+  --text: #1a1a18; --text2: #6b6b67; --text3: #9b9b96;
+  --border: rgba(0,0,0,0.1); --border2: rgba(0,0,0,0.18);
+  --green: #3B6D11; --green-bg: #EAF3DE; --green-bar: #639922;
+  --amber: #854F0B; --amber-bg: #FAEEDA;
+  --red: #A32D2D; --red-bg: #FCEBEB;
+  --blue-bg: #E6F1FB; --blue: #0C447C;
+  --purple-bg: #EEEDFE; --purple: #3C3489;
+  --radius: 8px; --radius-lg: 12px;
+  --font: -apple-system, BlinkMacSystemFont, 'Segoe UI', Helvetica, Arial, sans-serif;
+}
+@media (prefers-color-scheme: dark) {
+  :root {
+    --bg: #1c1c1a; --bg2: #252523; --bg3: #2a2a27;
+    --text: #f0f0ec; --text2: #9a9a95; --text3: #64645f;
+    --border: rgba(255,255,255,0.09); --border2: rgba(255,255,255,0.16);
+  }
+}
+html, body { min-height: 100%; }
+body {
+  font-family: var(--font); font-size: 15px; line-height: 1.5;
+  background: var(--bg3); color: var(--text);
+}
+a { color: inherit; }
+
+/* ── Layout ── */
+.shell { display: flex; min-height: 100vh; }
+.sidebar {
+  width: 220px; flex-shrink: 0; background: var(--bg);
+  border-right: 0.5px solid var(--border2);
+  padding: 1.75rem 0; position: sticky; top: 0; height: 100vh;
+  overflow-y: auto;
+}
+.sidebar-logo {
+  padding: 0 1.25rem 1.5rem;
+  border-bottom: 0.5px solid var(--border);
+}
+.sidebar-logo .avatar {
+  width: 40px; height: 40px; border-radius: 50%;
+  background: var(--purple-bg); color: var(--purple);
+  display: flex; align-items: center; justify-content: center;
+  font-size: 14px; font-weight: 600; margin-bottom: 10px;
+}
+.sidebar-logo .name { font-size: 14px; font-weight: 500; }
+.sidebar-logo .sub { font-size: 12px; color: var(--text3); margin-top: 1px; }
+.sidebar-nav { padding: 1rem 0; }
+.sidebar-nav button {
+  display: flex; align-items: center; gap: 10px;
+  width: 100%; padding: 8px 1.25rem;
+  background: none; border: none; cursor: pointer;
+  font-family: var(--font); font-size: 13px; color: var(--text2);
+  text-align: left; border-radius: 0; transition: all .12s;
+}
+.sidebar-nav button:hover { background: var(--bg2); color: var(--text); }
+.sidebar-nav button.active {
+  background: var(--bg2); color: var(--text); font-weight: 500;
+  border-right: 2px solid var(--text);
+}
+.sidebar-nav .icon { font-size: 15px; opacity: .7; width: 18px; text-align: center; }
+.sidebar-nav .timer { font-size: 11px; color: var(--text3); margin-left: auto; }
+
+.main { flex: 1; min-width: 0; padding: 2.5rem 2rem; max-width: 800px; }
+
+/* ── Section ── */
+.section { display: none; } .section.active { display: block; }
+.section-header {
+  display: flex; align-items: flex-start; justify-content: space-between;
+  margin-bottom: 1.5rem; padding-bottom: 1rem;
+  border-bottom: 0.5px solid var(--border);
+}
+.section-heading { font-size: 20px; font-weight: 500; }
+.section-desc { font-size: 13px; color: var(--text3); margin-top: 3px; }
+.add-btn {
+  display: inline-flex; align-items: center; gap: 6px;
+  padding: 6px 14px; border-radius: var(--radius);
+  border: 0.5px solid var(--border2); background: var(--bg);
+  color: var(--text2); font-size: 13px; font-family: var(--font);
+  cursor: pointer; transition: all .12s; white-space: nowrap;
+}
+.add-btn:hover { background: var(--bg2); color: var(--text); }
+
+/* ── Cards ── */
+.card {
+  background: var(--bg); border: 0.5px solid var(--border);
+  border-radius: var(--radius-lg); padding: 1rem 1.25rem; margin-bottom: 10px;
+}
+.card-row { display: flex; align-items: flex-start; gap: 10px; }
+.card-main { flex: 1; min-width: 0; }
+.card-text { font-size: 14px; line-height: 1.55; color: var(--text); }
+.card-meta { font-size: 12px; color: var(--text3); margin-top: 5px; }
+.del-btn {
+  background: none; border: none; cursor: pointer; color: var(--text3);
+  font-size: 14px; padding: 2px 4px; opacity: .45; flex-shrink: 0;
+  border-radius: 4px; transition: all .12s;
+}
+.del-btn:hover { opacity: 1; color: var(--red); background: var(--red-bg); }
+.empty { font-size: 13px; color: var(--text3); padding: 2rem 0; text-align: center; }
+
+/* ── Badges ── */
+.badge {
+  display: inline-block; font-size: 11px; padding: 2px 8px;
+  border-radius: var(--radius); font-weight: 500;
+}
+.badge-pro { background: var(--green-bg); color: var(--green); }
+.badge-per { background: var(--blue-bg); color: var(--blue); }
+.badge-pos { background: var(--green-bg); color: var(--green); }
+.badge-neg { background: var(--red-bg); color: var(--red); }
+.badge-neu { background: var(--bg2); color: var(--text2); }
+
+/* ── Metrics ── */
+.metric-grid {
+  display: grid; grid-template-columns: repeat(auto-fill, minmax(160px, 1fr));
+  gap: 10px; margin-bottom: 1rem;
+}
+.metric-card {
+  background: var(--bg2); border-radius: var(--radius);
+  padding: 1rem; position: relative; cursor: pointer;
+  border: 0.5px solid var(--border); transition: border-color .15s;
+}
+.metric-card:hover { border-color: var(--border2); }
+.metric-dot {
+  width: 8px; height: 8px; border-radius: 50%;
+  position: absolute; top: 12px; right: 12px;
+}
+.dot-green { background: var(--green-bar); }
+.dot-yellow { background: #BA7517; }
+.dot-red { background: #E24B4A; }
+.metric-label { font-size: 11px; color: var(--text2); margin-bottom: 4px; text-transform: uppercase; letter-spacing: .4px; }
+.metric-value { font-size: 24px; font-weight: 500; }
+.metric-target { font-size: 11px; color: var(--text3); margin-top: 3px; }
+.metric-hint { font-size: 10px; color: var(--text3); margin-top: 6px; }
+
+/* ── Rocks ── */
+.owner-group { margin-bottom: 1.5rem; }
+.owner-label {
+  display: flex; align-items: center; gap: 8px; margin-bottom: 8px;
+}
+.mini-avatar {
+  width: 26px; height: 26px; border-radius: 50%;
+  background: var(--purple-bg); color: var(--purple);
+  display: flex; align-items: center; justify-content: center;
+  font-size: 10px; font-weight: 600; flex-shrink: 0;
+}
+.owner-name-text { font-size: 13px; font-weight: 500; }
+.rock-card { margin-left: 34px; }
+.rock-status-btn {
+  font-size: 11px; padding: 3px 9px; border-radius: var(--radius);
+  border: 0.5px solid; background: none; cursor: pointer;
+  font-family: var(--font); transition: all .12s;
+}
+.rock-on { color: var(--green); border-color: var(--green-bar); }
+.rock-at { color: var(--amber); border-color: #EF9F27; }
+.rock-off { color: var(--red); border-color: #F09595; }
+.progress-track {
+  background: var(--bg2); border-radius: 4px; height: 5px;
+  overflow: hidden; flex: 1;
+}
+.progress-fill { height: 5px; border-radius: 4px; transition: width .3s; }
+
+/* ── Todos ── */
+.todo-list-wrap { background: var(--bg); border: 0.5px solid var(--border); border-radius: var(--radius-lg); overflow: hidden; margin-top: 12px; }
+.todo-row {
+  display: flex; align-items: center; gap: 10px;
+  padding: 10px 1.25rem; border-bottom: 0.5px solid var(--border);
+}
+.todo-row:last-child { border-bottom: none; }
+.check-box {
+  width: 17px; height: 17px; border-radius: 4px;
+  border: 1.5px solid var(--border2); cursor: pointer;
+  flex-shrink: 0; display: flex; align-items: center; justify-content: center;
+  transition: all .12s;
+}
+.check-box.done { background: var(--green-bar); border-color: var(--green-bar); color: white; font-size: 11px; }
+.todo-text-wrap { flex: 1; min-width: 0; }
+.todo-text { font-size: 14px; }
+.todo-text.done { text-decoration: line-through; color: var(--text3); }
+.rolling-pill {
+  font-size: 11px; background: var(--amber-bg); color: var(--amber);
+  padding: 2px 7px; border-radius: var(--radius);
+}
+
+/* ── Issues ── */
+.issue-list-wrap { background: var(--bg); border: 0.5px solid var(--border); border-radius: var(--radius-lg); overflow: hidden; margin-top: 12px; }
+.issue-row {
+  display: flex; align-items: flex-start; gap: 10px;
+  padding: 10px 1.25rem; border-bottom: 0.5px solid var(--border);
+}
+.issue-row:last-child { border-bottom: none; }
+.prio-pill {
+  font-size: 11px; padding: 2px 8px; border-radius: var(--radius); font-weight: 500; flex-shrink: 0;
+}
+.prio-high { background: var(--red-bg); color: var(--red); }
+.prio-med { background: var(--amber-bg); color: var(--amber); }
+.prio-low { background: var(--bg2); color: var(--text2); }
+
+/* ── Footer ── */
+.page-footer {
+  display: flex; align-items: center; justify-content: space-between;
+  margin-top: 2rem; padding-top: 1rem; border-top: 0.5px solid var(--border);
+}
+.saved-flash { font-size: 12px; color: var(--green); opacity: 0; transition: opacity .4s; }
+.saved-flash.show { opacity: 1; }
+.last-saved { font-size: 12px; color: var(--text3); }
+
+/* ── Modal ── */
+.modal-overlay {
+  display: none; position: fixed; inset: 0;
+  background: rgba(0,0,0,.4); z-index: 200;
+  align-items: center; justify-content: center; padding: 1rem;
+}
+.modal-overlay.open { display: flex; }
+.modal {
+  background: var(--bg); border: 0.5px solid var(--border2);
+  border-radius: var(--radius-lg); padding: 1.75rem;
+  width: 420px; max-width: 100%;
+  box-shadow: 0 8px 40px rgba(0,0,0,.15);
+}
+.modal-title { font-size: 16px; font-weight: 500; margin-bottom: 1.25rem; }
+.field { margin-bottom: 12px; }
+.field label { display: block; font-size: 12px; font-weight: 500; color: var(--text2); margin-bottom: 5px; text-transform: uppercase; letter-spacing: .4px; }
+.field input, .field select, .field textarea {
+  width: 100%; padding: 8px 10px;
+  border: 0.5px solid var(--border2); border-radius: var(--radius);
+  background: var(--bg2); color: var(--text);
+  font-family: var(--font); font-size: 14px; outline: none;
+}
+.field input:focus, .field select:focus, .field textarea:focus {
+  border-color: var(--text2); box-shadow: 0 0 0 3px rgba(0,0,0,.06);
+}
+.field textarea { height: 80px; resize: vertical; }
+.modal-actions { display: flex; justify-content: flex-end; gap: 8px; margin-top: 1.25rem; }
+.btn-cancel {
+  padding: 7px 16px; border-radius: var(--radius);
+  border: 0.5px solid var(--border2); background: transparent;
+  color: var(--text2); font-family: var(--font); font-size: 13px; cursor: pointer;
+}
+.btn-cancel:hover { background: var(--bg2); }
+.btn-save {
+  padding: 7px 16px; border-radius: var(--radius);
+  border: none; background: var(--text); color: var(--bg);
+  font-family: var(--font); font-size: 13px; font-weight: 500; cursor: pointer;
+}
+.btn-save:hover { opacity: .88; }
+
+.ts { font-size: 11px; color: var(--text3); }
+input[type=range] { width: 100%; accent-color: var(--green-bar); cursor: pointer; }
 </style>
+</head>
+<body>
 
-<h2 class="sr-only">L10 meeting dashboard with persistent storage</h2>
+<div class="shell">
+  <!-- Sidebar -->
+  <aside class="sidebar">
+    <div class="sidebar-logo">
+      <div class="avatar">LR</div>
+      <div class="name">Larissa Russell</div>
+      <div class="sub">L10 Weekly Dashboard</div>
+    </div>
+    <nav class="sidebar-nav" id="nav">
+      <button class="active" data-tab="bests">
+        <span class="icon">⭐</span> Personal / pro best <span class="timer">5 min</span>
+      </button>
+      <button data-tab="metrics">
+        <span class="icon">📊</span> Metrics <span class="timer">5 min</span>
+      </button>
+      <button data-tab="headlines">
+        <span class="icon">📰</span> Headlines <span class="timer">5 min</span>
+      </button>
+      <button data-tab="rocks">
+        <span class="icon">🪨</span> Rocks <span class="timer">10 min</span>
+      </button>
+      <button data-tab="todos">
+        <span class="icon">✅</span> To-dos <span class="timer">5 min</span>
+      </button>
+      <button data-tab="issues">
+        <span class="icon">⚡</span> Issues <span class="timer">15 min</span>
+      </button>
+    </nav>
+  </aside>
 
-<div class="dash">
-<nav class="nav" id="nav">
-  <button class="active" data-tab="bests">Personal / professional best</button>
-  <button data-tab="metrics">Metrics</button>
-  <button data-tab="headlines">Headlines</button>
-  <button data-tab="rocks">Rocks</button>
-  <button data-tab="todos">To-dos</button>
-  <button data-tab="issues">Issues</button>
-</nav>
+  <!-- Main -->
+  <main class="main">
 
-<div id="bests" class="section active">
-  <div class="section-header"><span class="section-title">Personal / professional bests</span><span class="section-timer"><i class="ti ti-clock" aria-hidden="true"></i> 5 min</span></div>
-  <button class="add-btn" onclick="openModal('best')"><i class="ti ti-plus" aria-hidden="true"></i> Add best</button>
-  <div id="bests-list" style="margin-top:12px"></div>
+    <!-- Bests -->
+    <div id="bests" class="section active">
+      <div class="section-header">
+        <div>
+          <div class="section-heading">Personal / professional best</div>
+          <div class="section-desc">Share 1 personal OR 1 professional win from the past week</div>
+        </div>
+        <button class="add-btn" onclick="openModal('best')">+ Add best</button>
+      </div>
+      <div id="bests-list"></div>
+    </div>
+
+    <!-- Metrics -->
+    <div id="metrics" class="section">
+      <div class="section-header">
+        <div>
+          <div class="section-heading">Metrics of interest</div>
+          <div class="section-desc">Weekly numbers — click a card to cycle its status</div>
+        </div>
+        <button class="add-btn" onclick="openModal('metric')">+ Add metric</button>
+      </div>
+      <div class="metric-grid" id="metrics-grid"></div>
+    </div>
+
+    <!-- Headlines -->
+    <div id="headlines" class="section">
+      <div class="section-header">
+        <div>
+          <div class="section-heading">Headlines</div>
+          <div class="section-desc">People, events, or unique happenings — positive or negative</div>
+        </div>
+        <button class="add-btn" onclick="openModal('headline')">+ Add headline</button>
+      </div>
+      <div id="headlines-list"></div>
+    </div>
+
+    <!-- Rocks -->
+    <div id="rocks" class="section">
+      <div class="section-header">
+        <div>
+          <div class="section-heading">Rocks</div>
+          <div class="section-desc">Quarterly milestones — drag slider to update progress</div>
+        </div>
+        <button class="add-btn" onclick="openModal('rock')">+ Add rock</button>
+      </div>
+      <div id="rocks-list"></div>
+    </div>
+
+    <!-- Todos -->
+    <div id="todos" class="section">
+      <div class="section-header">
+        <div>
+          <div class="section-heading">To-dos</div>
+          <div class="section-desc">This week's tasks plus rolling items</div>
+        </div>
+        <button class="add-btn" onclick="openModal('todo')">+ Add to-do</button>
+      </div>
+      <div class="todo-list-wrap"><div id="todos-list"></div></div>
+    </div>
+
+    <!-- Issues -->
+    <div id="issues" class="section">
+      <div class="section-header">
+        <div>
+          <div class="section-heading">Issues</div>
+          <div class="section-desc">Seat-specific issues and time-sensitive opportunities</div>
+        </div>
+        <button class="add-btn" onclick="openModal('issue')">+ Add issue</button>
+      </div>
+      <div class="issue-list-wrap"><div id="issues-list"></div></div>
+    </div>
+
+    <div class="page-footer">
+      <span class="saved-flash" id="saved-flash">✓ Saved</span>
+      <span class="last-saved" id="last-saved"></span>
+    </div>
+  </main>
 </div>
 
-<div id="metrics" class="section">
-  <div class="section-header"><span class="section-title">Metrics of interest</span><span class="section-timer"><i class="ti ti-clock" aria-hidden="true"></i> 5 min</span></div>
-  <div class="metric-grid" id="metrics-grid"></div>
-  <button class="add-btn" onclick="openModal('metric')"><i class="ti ti-plus" aria-hidden="true"></i> Add metric</button>
-</div>
-
-<div id="headlines" class="section">
-  <div class="section-header"><span class="section-title">Headlines</span><span class="section-timer"><i class="ti ti-clock" aria-hidden="true"></i> 5 min</span></div>
-  <button class="add-btn" onclick="openModal('headline')"><i class="ti ti-plus" aria-hidden="true"></i> Add headline</button>
-  <div id="headlines-list" style="margin-top:12px"></div>
-</div>
-
-<div id="rocks" class="section">
-  <div class="section-header"><span class="section-title">Rocks</span><span class="section-timer"><i class="ti ti-clock" aria-hidden="true"></i> 10 min</span></div>
-  <button class="add-btn" onclick="openModal('rock')"><i class="ti ti-plus" aria-hidden="true"></i> Add rock</button>
-  <div id="rocks-list" style="margin-top:12px"></div>
-</div>
-
-<div id="todos" class="section">
-  <div class="section-header"><span class="section-title">To-dos</span><span class="section-timer"><i class="ti ti-clock" aria-hidden="true"></i> 5 min</span></div>
-  <button class="add-btn" onclick="openModal('todo')"><i class="ti ti-plus" aria-hidden="true"></i> Add to-do</button>
-  <div class="card" style="margin-top:12px"><div id="todos-list"></div></div>
-</div>
-
-<div id="issues" class="section">
-  <div class="section-header"><span class="section-title">Issues</span><span class="section-timer"><i class="ti ti-clock" aria-hidden="true"></i> 15 min</span></div>
-  <button class="add-btn" onclick="openModal('issue')"><i class="ti ti-plus" aria-hidden="true"></i> Add issue</button>
-  <div class="card" style="margin-top:12px"><div id="issues-list"></div></div>
-</div>
-</div>
-
-<div style="margin-top:1rem;padding-top:1rem;border-top:0.5px solid var(--color-border-tertiary);display:flex;align-items:center;justify-content:space-between">
-  <span id="saved-tag" class="saved-tag"><i class="ti ti-check" aria-hidden="true"></i> Saved</span>
-  <span id="last-saved" class="ts"></span>
-</div>
-
-<div class="modal-overlay" id="modal-overlay">
+<!-- Modal -->
+<div class="modal-overlay" id="modal-overlay" onclick="overlayClick(event)">
   <div class="modal">
-    <h3 id="modal-title">Add item</h3>
+    <div class="modal-title" id="modal-title"></div>
     <div id="modal-body"></div>
-    <div class="modal-footer">
-      <button onclick="closeModal()">Cancel</button>
-      <button class="primary" onclick="saveModal()">Add</button>
+    <div class="modal-actions">
+      <button class="btn-cancel" onclick="closeModal()">Cancel</button>
+      <button class="btn-save" onclick="saveModal()">Add</button>
     </div>
   </div>
 </div>
 
 <script>
-const MEMBERS=['Larissa Russell','Alex','Jordan','Morgan','Sam','Pranav Dalvi'];
-const STORAGE_KEY='l10-dashboard-data';
+const MEMBERS = ['Larissa Russell','Alex','Jordan','Morgan','Sam','Pranav Dalvi'];
+const KEY = 'larissa-l10-v2';
 
-const DEFAULT_DATA={
-  bests:[],
-  metrics:[],
-  headlines:[],
-  rocks:[
-    {title:'Summer staff hired by Memorial Day',owner:'Larissa Russell',pct:0,status:'on',due:'Jul 27'},
-    {title:'TC cafe project completed by 6/15',owner:'Larissa Russell',pct:0,status:'on',due:'Jul 27'},
+const DEFAULTS = {
+  bests: [],
+  metrics: [],
+  headlines: [],
+  rocks: [
+    { title: 'Summer staff hired by Memorial Day', owner: 'Larissa Russell', pct: 0, status: 'on', due: 'Jul 27' },
+    { title: 'TC cafe project completed by 6/15',  owner: 'Larissa Russell', pct: 0, status: 'on', due: 'Jul 27' },
   ],
-  todos:[],
-  issues:[]
+  todos: [],
+  issues: []
 };
 
-let data=DEFAULT_DATA;
-let saveTimer=null;
+let data = JSON.parse(JSON.stringify(DEFAULTS));
+let flashTimer;
 
-async function loadData(){
-  try{
-    const res=await window.storage.get(STORAGE_KEY);
-    if(res&&res.value){
-      data=JSON.parse(res.value);
-    }
-  }catch(e){
-    data=JSON.parse(JSON.stringify(DEFAULT_DATA));
-  }
-  render();
-  updateLastSaved();
+/* ── Storage ── */
+function load() {
+  try { const r = localStorage.getItem(KEY); if (r) data = JSON.parse(r); } catch(e) {}
+  render(); showLastSaved();
 }
-
-async function saveData(){
-  try{
-    await window.storage.set(STORAGE_KEY,JSON.stringify(data));
-    flashSaved();
-  }catch(e){
-    console.error('Save failed',e);
-  }
+function save() {
+  try { localStorage.setItem(KEY, JSON.stringify(data)); } catch(e) {}
+  flash(); showLastSaved();
 }
-
-function flashSaved(){
-  const tag=document.getElementById('saved-tag');
-  tag.classList.add('show');
-  clearTimeout(saveTimer);
-  saveTimer=setTimeout(()=>tag.classList.remove('show'),2000);
-  updateLastSaved();
+function flash() {
+  const el = document.getElementById('saved-flash');
+  el.classList.add('show'); clearTimeout(flashTimer);
+  flashTimer = setTimeout(() => el.classList.remove('show'), 2000);
 }
-
-function updateLastSaved(){
-  const el=document.getElementById('last-saved');
-  el.textContent='Last saved: '+new Date().toLocaleTimeString([],{hour:'2-digit',minute:'2-digit'});
+function showLastSaved() {
+  document.getElementById('last-saved').textContent =
+    'Last saved ' + new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
 }
+function now() {
+  return new Date().toLocaleDateString([], { month: 'short', day: 'numeric' }) + ' at ' +
+    new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
+}
+function initials(n) { return n.split(' ').map(p => p[0]).join('').toUpperCase().slice(0,2); }
 
-function ts(){return new Date().toLocaleDateString([],{month:'short',day:'numeric',hour:'2-digit',minute:'2-digit'});}
-function initials(name){return name.split(' ').map(p=>p[0]).join('').toUpperCase().slice(0,2);}
+/* ── Render ── */
+function render() { rBests(); rMetrics(); rHeadlines(); rRocks(); rTodos(); rIssues(); }
 
-function render(){renderBests();renderMetrics();renderHeadlines();renderRocks();renderTodos();renderIssues();}
-
-function renderBests(){
-  const el=document.getElementById('bests-list');
-  if(!data.bests.length){el.innerHTML='<p class="empty">No bests added yet</p>';return;}
-  el.innerHTML=data.bests.map((b,i)=>`
+function rBests() {
+  const el = document.getElementById('bests-list');
+  if (!data.bests.length) { el.innerHTML = '<p class="empty">No bests added yet — share a win!</p>'; return; }
+  el.innerHTML = data.bests.map((b,i) => `
     <div class="card"><div class="card-row"><div class="card-main">
-      <span class="badge ${b.type==='professional'?'badge-pro':'badge-per'}">${b.type==='professional'?'Professional':'Personal'}</span>
-      <p class="card-text" style="margin-top:6px">${b.text}</p>
-      <p class="card-meta">${b.who} &middot; <span class="ts">${b.addedAt||''}</span></p>
-    </div><button class="delete-btn" onclick="del('bests',${i})" aria-label="Remove"><i class="ti ti-x" aria-hidden="true"></i></button></div></div>`).join('');
+      <span class="badge badge-${b.type==='professional'?'pro':'per'}">${b.type==='professional'?'Professional':'Personal'}</span>
+      <p class="card-text" style="margin-top:7px">${b.text}</p>
+      <p class="card-meta">${b.who} &middot; <span class="ts">${b.at||''}</span></p>
+    </div><button class="del-btn" onclick="del('bests',${i})">✕</button></div></div>`).join('');
 }
 
-function renderMetrics(){
-  const el=document.getElementById('metrics-grid');
-  if(!data.metrics.length){el.innerHTML='<p class="empty">No metrics added yet</p>';return;}
-  el.innerHTML=data.metrics.map((m,i)=>`
-    <div class="metric-card" style="cursor:pointer" onclick="editMetricStatus(${i})">
-      <div class="status-dot dot-${m.status}"></div>
+function rMetrics() {
+  const el = document.getElementById('metrics-grid');
+  if (!data.metrics.length) { el.innerHTML = '<p class="empty" style="grid-column:1/-1">No metrics yet</p>'; return; }
+  el.innerHTML = data.metrics.map((m,i) => `
+    <div class="metric-card" onclick="cycleMetric(${i})">
+      <div class="metric-dot dot-${m.status}"></div>
       <p class="metric-label">${m.label}</p>
       <p class="metric-value">${m.value}</p>
       <p class="metric-target">Target: ${m.target}</p>
-      <p class="ts" style="margin-top:4px">${m.updatedAt||''}</p>
+      <p class="metric-hint ts">Click to cycle status</p>
     </div>`).join('');
 }
-
-function editMetricStatus(i){
-  const s=['green','yellow','red'];
-  data.metrics[i].status=s[(s.indexOf(data.metrics[i].status)+1)%3];
-  data.metrics[i].updatedAt=ts();
-  saveData();renderMetrics();
+function cycleMetric(i) {
+  const s = ['green','yellow','red'];
+  data.metrics[i].status = s[(s.indexOf(data.metrics[i].status)+1)%3];
+  save(); rMetrics();
 }
 
-function renderHeadlines(){
-  const el=document.getElementById('headlines-list');
-  if(!data.headlines.length){el.innerHTML='<p class="empty">No headlines yet</p>';return;}
-  el.innerHTML=data.headlines.map((h,i)=>`
+function rHeadlines() {
+  const el = document.getElementById('headlines-list');
+  if (!data.headlines.length) { el.innerHTML = '<p class="empty">No headlines yet</p>'; return; }
+  el.innerHTML = data.headlines.map((h,i) => `
     <div class="card"><div class="card-row"><div class="card-main">
-      <span class="badge badge-${h.sentiment==='positive'?'pos':h.sentiment==='negative'?'neg':'neu'}">${h.sentiment}</span>
-      <p class="card-text" style="margin-top:6px">${h.text}</p>
-      <p class="card-meta">${h.who} &middot; <span class="ts">${h.addedAt||''}</span></p>
-    </div><button class="delete-btn" onclick="del('headlines',${i})" aria-label="Remove"><i class="ti ti-x" aria-hidden="true"></i></button></div></div>`).join('');
+      <span class="badge badge-${h.s==='positive'?'pos':h.s==='negative'?'neg':'neu'}">${h.s}</span>
+      <p class="card-text" style="margin-top:7px">${h.text}</p>
+      <p class="card-meta">${h.who} &middot; <span class="ts">${h.at||''}</span></p>
+    </div><button class="del-btn" onclick="del('headlines',${i})">✕</button></div></div>`).join('');
 }
 
-function renderRocks(){
-  const el=document.getElementById('rocks-list');
-  if(!data.rocks.length){el.innerHTML='<p class="empty">No rocks added yet</p>';return;}
-  const colors={on:'#639922',at:'#BA7517',off:'#E24B4A'};
-  const grouped={};
-  data.rocks.forEach((r,i)=>{if(!grouped[r.owner])grouped[r.owner]=[];grouped[r.owner].push({...r,idx:i});});
-  el.innerHTML=Object.entries(grouped).map(([owner,rocks])=>`
-    <div style="margin-bottom:1.25rem">
-      <div style="display:flex;align-items:center;gap:8px;margin-bottom:8px">
-        <div class="avatar">${initials(owner)}</div>
-        <span style="font-size:14px;font-weight:500;color:var(--color-text-primary)">${owner}</span>
-        <span style="font-size:12px;color:var(--color-text-tertiary)">${rocks.length} rock${rocks.length!==1?'s':''}</span>
+function rRocks() {
+  const el = document.getElementById('rocks-list');
+  if (!data.rocks.length) { el.innerHTML = '<p class="empty">No rocks added yet</p>'; return; }
+  const clr = { on:'#639922', at:'#BA7517', off:'#E24B4A' };
+  const grp = {};
+  data.rocks.forEach((r,i) => { if (!grp[r.owner]) grp[r.owner]=[]; grp[r.owner].push({...r,i}); });
+  el.innerHTML = Object.entries(grp).map(([owner, rocks]) => `
+    <div class="owner-group">
+      <div class="owner-label">
+        <div class="mini-avatar">${initials(owner)}</div>
+        <span class="owner-name-text">${owner}</span>
+        <span class="ts">${rocks.length} rock${rocks.length!==1?'s':''}</span>
       </div>
-      ${rocks.map(r=>`
-        <div class="card" style="margin-left:36px">
+      ${rocks.map(r => `
+        <div class="card rock-card">
           <div class="card-row"><div class="card-main">
-            <p class="card-text" style="font-weight:500">${r.title}</p>
-            <div style="display:flex;align-items:center;gap:8px;margin:6px 0 2px">
-              <input type="range" min="0" max="100" value="${r.pct}" step="5"
-                style="flex:1;height:4px"
-                oninput="updateRockPct(${r.idx},this.value)"
-                onchange="saveData()">
-              <span style="font-size:12px;font-weight:500;color:var(--color-text-primary);min-width:32px">${r.pct}%</span>
+            <p class="card-text" style="font-weight:500;margin-bottom:10px">${r.title}</p>
+            <div style="display:flex;align-items:center;gap:10px;margin-bottom:8px">
+              <input type="range" min="0" max="100" step="5" value="${r.pct}"
+                style="flex:1"
+                oninput="updatePct(${r.i},this.value)"
+                onchange="save()">
+              <span id="pct-${r.i}" style="font-size:13px;font-weight:500;min-width:36px;text-align:right">${r.pct}%</span>
             </div>
-            <div class="rock-bar-wrap" style="display:none"><div class="rock-bar" style="width:${r.pct}%;background:${colors[r.status]}"></div></div>
-            <div style="display:flex;align-items:center;justify-content:space-between;margin-top:4px">
-              <span class="ts">${r.due?'Due '+r.due:''}${r.updatedAt?' &middot; Updated '+r.updatedAt:''}</span>
-              <button class="rock-status rock-${r.status}" onclick="cycleRock(${r.idx})">${r.status==='on'?'On track':r.status==='at'?'At risk':'Off track'}</button>
+            <div style="display:flex;align-items:center;gap:8px;margin-bottom:8px">
+              <div class="progress-track">
+                <div class="progress-fill" id="bar-${r.i}" style="width:${r.pct}%;background:${clr[r.status]}"></div>
+              </div>
+            </div>
+            <div style="display:flex;align-items:center;justify-content:space-between">
+              <span class="ts">${r.due?'Due '+r.due:''}${r.at?' &middot; Updated '+r.at:''}</span>
+              <button class="rock-status-btn rock-${r.status}" onclick="cycleRock(${r.i})">
+                ${r.status==='on'?'On track':r.status==='at'?'At risk':'Off track'}
+              </button>
             </div>
           </div>
-          <button class="delete-btn" onclick="del('rocks',${r.idx})" aria-label="Remove"><i class="ti ti-x" aria-hidden="true"></i></button></div>
+          <button class="del-btn" onclick="del('rocks',${r.i})">✕</button></div>
         </div>`).join('')}
     </div>`).join('');
 }
-
-function updateRockPct(i,val){
-  data.rocks[i].pct=parseInt(val);
-  data.rocks[i].updatedAt=ts();
-  const labels=document.querySelectorAll(`[oninput="updateRockPct(${i},this.value)"]`);
-  labels.forEach(el=>{
-    const span=el.nextElementSibling;
-    if(span)span.textContent=val+'%';
-  });
+function updatePct(i, val) {
+  data.rocks[i].pct = parseInt(val);
+  data.rocks[i].at = now();
+  const pEl = document.getElementById('pct-'+i);
+  const bEl = document.getElementById('bar-'+i);
+  if (pEl) pEl.textContent = val + '%';
+  const clr = { on:'#639922', at:'#BA7517', off:'#E24B4A' };
+  if (bEl) { bEl.style.width = val+'%'; bEl.style.background = clr[data.rocks[i].status]; }
+}
+function cycleRock(i) {
+  const s = ['on','at','off'];
+  data.rocks[i].status = s[(s.indexOf(data.rocks[i].status)+1)%3];
+  data.rocks[i].at = now();
+  save(); rRocks();
 }
 
-function renderTodos(){
-  const el=document.getElementById('todos-list');
-  if(!data.todos.length){el.innerHTML='<p class="empty">No to-dos yet</p>';return;}
-  el.innerHTML=data.todos.map((t,i)=>`
+function rTodos() {
+  const el = document.getElementById('todos-list');
+  if (!data.todos.length) { el.innerHTML = '<p class="empty">No to-dos yet</p>'; return; }
+  el.innerHTML = data.todos.map((t,i) => `
     <div class="todo-row">
-      <div class="todo-check ${t.done?'done':''}" onclick="toggleTodo(${i})" role="checkbox" aria-checked="${t.done}">
-        ${t.done?'<i class="ti ti-check" style="font-size:11px;color:#fff" aria-hidden="true"></i>':''}
+      <div class="check-box${t.done?' done':''}" onclick="toggleTodo(${i})">${t.done?'✓':''}</div>
+      <div class="todo-text-wrap">
+        <span class="todo-text${t.done?' done':''}">${t.text}</span>
+        <span class="ts" style="display:block">${t.owner}${t.at?' &middot; '+t.at:''}</span>
       </div>
-      <div style="flex:1;min-width:0">
-        <span class="todo-text ${t.done?'done-text':''}">${t.text}</span>
-        <span class="ts" style="display:block">${t.owner}${t.addedAt?' &middot; '+t.addedAt:''}</span>
-      </div>
-      ${t.rolling?'<span class="todo-rolling">rolling</span>':''}
-      <button class="delete-btn" onclick="del('todos',${i})" aria-label="Remove"><i class="ti ti-x" aria-hidden="true"></i></button>
+      ${t.rolling?'<span class="rolling-pill">rolling</span>':''}
+      <button class="del-btn" onclick="del('todos',${i})">✕</button>
     </div>`).join('');
 }
+function toggleTodo(i) { data.todos[i].done = !data.todos[i].done; save(); rTodos(); }
 
-function renderIssues(){
-  const el=document.getElementById('issues-list');
-  if(!data.issues.length){el.innerHTML='<p class="empty">No issues yet</p>';return;}
-  el.innerHTML=data.issues.map((iss,i)=>`
+function rIssues() {
+  const el = document.getElementById('issues-list');
+  if (!data.issues.length) { el.innerHTML = '<p class="empty">No issues yet</p>'; return; }
+  el.innerHTML = data.issues.map((iss,i) => `
     <div class="issue-row">
-      <span class="issue-prio prio-${iss.priority}">${iss.priority}</span>
+      <span class="prio-pill prio-${iss.p}">${iss.p}</span>
       <div style="flex:1;min-width:0">
         <p class="card-text">${iss.text}</p>
-        <p class="issue-seat">Seat: ${iss.seat} &middot; <span class="ts">${iss.addedAt||''}</span></p>
+        <p class="ts">Seat: ${iss.seat}${iss.at?' &middot; '+iss.at:''}</p>
       </div>
-      <button class="delete-btn" onclick="del('issues',${i})" aria-label="Remove"><i class="ti ti-x" aria-hidden="true"></i></button>
+      <button class="del-btn" onclick="del('issues',${i})">✕</button>
     </div>`).join('');
 }
 
-function del(section,i){data[section].splice(i,1);saveData();render();}
-function toggleTodo(i){data.todos[i].done=!data.todos[i].done;saveData();renderTodos();}
-function cycleRock(i){const s=['on','at','off'];data.rocks[i].status=s[(s.indexOf(data.rocks[i].status)+1)%3];data.rocks[i].updatedAt=ts();saveData();renderRocks();}
+function del(sec, i) { data[sec].splice(i,1); save(); render(); }
 
-let currentModal='';
-const modalForms={
-  best:`<label>Type</label><select id="m-type"><option value="professional">Professional</option><option value="personal">Personal</option></select><label>Best this week</label><textarea id="m-text" placeholder="Describe the win..."></textarea><label>Team member</label><select id="m-who">${MEMBERS.map(m=>`<option>${m}</option>`).join('')}</select>`,
-  metric:`<label>Metric name</label><input id="m-label" placeholder="e.g. MRR"><label>Current value</label><input id="m-value" placeholder="e.g. $24,800"><label>Target</label><input id="m-target" placeholder="e.g. $25k"><label>Status</label><select id="m-status"><option value="green">Green — on track</option><option value="yellow">Yellow — watch</option><option value="red">Red — issue</option></select>`,
-  headline:`<label>Sentiment</label><select id="m-sentiment"><option value="positive">Positive</option><option value="negative">Negative</option><option value="neutral">Neutral</option></select><label>Headline</label><textarea id="m-text" placeholder="Describe the headline..."></textarea><label>Reported by</label><select id="m-who">${MEMBERS.map(m=>`<option>${m}</option>`).join('')}</select>`,
-  rock:`<label>Rock / milestone</label><input id="m-title" placeholder="e.g. Launch v2 of mobile app"><label>Owner</label><select id="m-owner">${MEMBERS.map(m=>`<option>${m}</option>`).join('')}</select><label>% complete</label><input id="m-pct" type="number" min="0" max="100" value="0"><label>Due date</label><input id="m-due" type="text" placeholder="e.g. Jul 27"><label>Status</label><select id="m-status"><option value="on">On track</option><option value="at">At risk</option><option value="off">Off track</option></select>`,
-  todo:`<label>To-do</label><input id="m-text" placeholder="Describe the task"><label>Owner</label><select id="m-who">${MEMBERS.map(m=>`<option>${m}</option>`).join('')}</select><label>Rolling item?</label><select id="m-rolling"><option value="no">No</option><option value="yes">Yes — carry forward</option></select>`,
-  issue:`<label>Issue / opportunity</label><textarea id="m-text" placeholder="Describe the issue or opportunity..."></textarea><label>Seat / area</label><input id="m-seat" placeholder="e.g. Sales, Product, Ops"><label>Priority</label><select id="m-priority"><option value="high">High</option><option value="medium">Medium</option><option value="low">Low</option></select>`,
+/* ── Modal ── */
+let curModal = '';
+const OPT = MEMBERS.map(m=>`<option>${m}</option>`).join('');
+const FORMS = {
+  best: `
+    <div class="field"><label>Type</label><select id="m-type"><option value="professional">Professional</option><option value="personal">Personal</option></select></div>
+    <div class="field"><label>What happened?</label><textarea id="m-text" placeholder="Describe the win..."></textarea></div>
+    <div class="field"><label>Team member</label><select id="m-who">${OPT}</select></div>`,
+  metric: `
+    <div class="field"><label>Metric name</label><input id="m-label" placeholder="e.g. MRR"></div>
+    <div class="field"><label>Current value</label><input id="m-value" placeholder="e.g. $24,800"></div>
+    <div class="field"><label>Target</label><input id="m-target" placeholder="e.g. $25k"></div>
+    <div class="field"><label>Status</label><select id="m-status"><option value="green">Green — on track</option><option value="yellow">Yellow — watch</option><option value="red">Red — issue</option></select></div>`,
+  headline: `
+    <div class="field"><label>Sentiment</label><select id="m-s"><option value="positive">Positive</option><option value="negative">Negative</option><option value="neutral">Neutral</option></select></div>
+    <div class="field"><label>Headline</label><textarea id="m-text" placeholder="Describe the event..."></textarea></div>
+    <div class="field"><label>Reported by</label><select id="m-who">${OPT}</select></div>`,
+  rock: `
+    <div class="field"><label>Rock / milestone</label><input id="m-title" placeholder="e.g. Launch v2 of mobile app"></div>
+    <div class="field"><label>Owner</label><select id="m-owner">${OPT}</select></div>
+    <div class="field"><label>% complete</label><input id="m-pct" type="number" min="0" max="100" value="0"></div>
+    <div class="field"><label>Due date</label><input id="m-due" placeholder="e.g. Jul 27"></div>
+    <div class="field"><label>Status</label><select id="m-status"><option value="on">On track</option><option value="at">At risk</option><option value="off">Off track</option></select></div>`,
+  todo: `
+    <div class="field"><label>To-do</label><input id="m-text" placeholder="Describe the task"></div>
+    <div class="field"><label>Owner</label><select id="m-who">${OPT}</select></div>
+    <div class="field"><label>Rolling item?</label><select id="m-rolling"><option value="no">No</option><option value="yes">Yes — carry forward each week</option></select></div>`,
+  issue: `
+    <div class="field"><label>Issue / opportunity</label><textarea id="m-text" placeholder="Describe the issue..."></textarea></div>
+    <div class="field"><label>Seat / area</label><input id="m-seat" placeholder="e.g. Sales, Product, Ops"></div>
+    <div class="field"><label>Priority</label><select id="m-p"><option value="high">High</option><option value="med">Medium</option><option value="low">Low</option></select></div>`,
 };
-const modalTitles={best:'Add personal / professional best',metric:'Add metric',headline:'Add headline',rock:'Add rock',todo:'Add to-do',issue:'Add issue / opportunity'};
+const TITLES = { best:'Add a best', metric:'Add a metric', headline:'Add a headline', rock:'Add a rock', todo:'Add a to-do', issue:'Add an issue' };
 
-function openModal(type){currentModal=type;document.getElementById('modal-title').textContent=modalTitles[type];document.getElementById('modal-body').innerHTML=modalForms[type];document.getElementById('modal-overlay').classList.add('open');}
-function closeModal(){document.getElementById('modal-overlay').classList.remove('open');currentModal='';}
+function openModal(t) {
+  curModal = t;
+  document.getElementById('modal-title').textContent = TITLES[t];
+  document.getElementById('modal-body').innerHTML = FORMS[t];
+  document.getElementById('modal-overlay').classList.add('open');
+}
+function closeModal() { document.getElementById('modal-overlay').classList.remove('open'); curModal=''; }
+function overlayClick(e) { if (e.target === e.currentTarget) closeModal(); }
 
-function saveModal(){
-  const v=id=>{const el=document.getElementById(id);return el?el.value.trim():''};
-  const now=ts();
-  if(currentModal==='best'){if(!v('m-text'))return;data.bests.unshift({type:v('m-type'),text:v('m-text'),who:v('m-who'),addedAt:now});}
-  else if(currentModal==='metric'){if(!v('m-label'))return;data.metrics.push({label:v('m-label'),value:v('m-value'),target:v('m-target'),status:v('m-status'),updatedAt:now});}
-  else if(currentModal==='headline'){if(!v('m-text'))return;data.headlines.unshift({sentiment:v('m-sentiment'),text:v('m-text'),who:v('m-who'),addedAt:now});}
-  else if(currentModal==='rock'){if(!v('m-title'))return;data.rocks.push({title:v('m-title'),owner:v('m-owner'),pct:parseInt(v('m-pct'))||0,status:v('m-status'),due:v('m-due'),updatedAt:now});}
-  else if(currentModal==='todo'){if(!v('m-text'))return;data.todos.push({text:v('m-text'),owner:v('m-who'),done:false,rolling:v('m-rolling')==='yes',addedAt:now});}
-  else if(currentModal==='issue'){if(!v('m-text'))return;data.issues.push({text:v('m-text'),seat:v('m-seat')||'General',priority:v('m-priority'),addedAt:now});}
-  closeModal();saveData();render();
+function v(id) { const el = document.getElementById(id); return el ? el.value.trim() : ''; }
+
+function saveModal() {
+  const t = now();
+  if (curModal==='best')     { if (!v('m-text')) return; data.bests.unshift({ type:v('m-type'), text:v('m-text'), who:v('m-who'), at:t }); }
+  if (curModal==='metric')   { if (!v('m-label')) return; data.metrics.push({ label:v('m-label'), value:v('m-value'), target:v('m-target'), status:v('m-status') }); }
+  if (curModal==='headline') { if (!v('m-text')) return; data.headlines.unshift({ s:v('m-s'), text:v('m-text'), who:v('m-who'), at:t }); }
+  if (curModal==='rock')     { if (!v('m-title')) return; data.rocks.push({ title:v('m-title'), owner:v('m-owner'), pct:parseInt(v('m-pct'))||0, status:v('m-status'), due:v('m-due'), at:t }); }
+  if (curModal==='todo')     { if (!v('m-text')) return; data.todos.push({ text:v('m-text'), owner:v('m-who'), done:false, rolling:v('m-rolling')==='yes', at:t }); }
+  if (curModal==='issue')    { if (!v('m-text')) return; data.issues.push({ text:v('m-text'), seat:v('m-seat')||'General', p:v('m-p'), at:t }); }
+  closeModal(); save(); render();
 }
 
-document.getElementById('nav').addEventListener('click',e=>{
-  const btn=e.target.closest('button');if(!btn)return;
-  document.querySelectorAll('.nav button').forEach(b=>b.classList.remove('active'));
-  document.querySelectorAll('.section').forEach(s=>s.classList.remove('active'));
-  btn.classList.add('active');document.getElementById(btn.dataset.tab).classList.add('active');
+/* ── Nav ── */
+document.getElementById('nav').addEventListener('click', e => {
+  const btn = e.target.closest('button[data-tab]');
+  if (!btn) return;
+  document.querySelectorAll('#nav button').forEach(b => b.classList.remove('active'));
+  document.querySelectorAll('.section').forEach(s => s.classList.remove('active'));
+  btn.classList.add('active');
+  document.getElementById(btn.dataset.tab).classList.add('active');
 });
-document.getElementById('modal-overlay').addEventListener('click',e=>{if(e.target===e.currentTarget)closeModal();});
 
-loadData();
+load();
 </script>
+</body>
+</html>
