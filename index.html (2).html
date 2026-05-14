@@ -1,0 +1,352 @@
+
+<style>
+*{box-sizing:border-box;margin:0;padding:0}
+body{font-family:var(--font-sans)}
+.dash{padding:1rem 0}
+.nav{display:flex;gap:8px;flex-wrap:wrap;margin-bottom:1.5rem;border-bottom:0.5px solid var(--color-border-tertiary);padding-bottom:1rem}
+.nav button{font-size:13px;padding:5px 12px;border-radius:var(--border-radius-md);border:0.5px solid var(--color-border-secondary);background:transparent;color:var(--color-text-secondary);cursor:pointer;transition:all .15s}
+.nav button.active{background:var(--color-background-secondary);color:var(--color-text-primary);border-color:var(--color-border-primary);font-weight:500}
+.section{display:none}.section.active{display:block}
+.section-header{display:flex;align-items:center;justify-content:space-between;margin-bottom:1rem}
+.section-title{font-size:16px;font-weight:500;color:var(--color-text-primary)}
+.section-timer{font-size:12px;color:var(--color-text-secondary);background:var(--color-background-secondary);padding:3px 10px;border-radius:var(--border-radius-md);border:0.5px solid var(--color-border-tertiary)}
+.add-btn{font-size:13px;padding:5px 12px;border-radius:var(--border-radius-md);border:0.5px solid var(--color-border-secondary);background:transparent;color:var(--color-text-secondary);cursor:pointer;display:flex;align-items:center;gap:6px}
+.add-btn:hover{background:var(--color-background-secondary)}
+.card{background:var(--color-background-primary);border:0.5px solid var(--color-border-tertiary);border-radius:var(--border-radius-lg);padding:1rem 1.25rem;margin-bottom:10px}
+.card-row{display:flex;align-items:flex-start;gap:10px}
+.card-main{flex:1;min-width:0}
+.card-meta{font-size:12px;color:var(--color-text-tertiary);margin-top:4px}
+.card-text{font-size:14px;color:var(--color-text-primary);line-height:1.5}
+.delete-btn{background:none;border:none;cursor:pointer;color:var(--color-text-tertiary);padding:2px;opacity:.5;flex-shrink:0;line-height:1}
+.delete-btn:hover{opacity:1}
+.badge{display:inline-block;font-size:11px;padding:2px 8px;border-radius:var(--border-radius-md);font-weight:500}
+.badge-pro{background:#EAF3DE;color:#27500A}
+.badge-per{background:#E6F1FB;color:#0C447C}
+.badge-pos{background:#EAF3DE;color:#27500A}
+.badge-neg{background:#FCEBEB;color:#791F1F}
+.badge-neu{background:#F1EFE8;color:#444441}
+.metric-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(160px,1fr));gap:10px;margin-bottom:1rem}
+.metric-card{background:var(--color-background-secondary);border-radius:var(--border-radius-md);padding:1rem;position:relative}
+.metric-label{font-size:12px;color:var(--color-text-secondary);margin-bottom:4px}
+.metric-value{font-size:22px;font-weight:500;color:var(--color-text-primary)}
+.metric-target{font-size:11px;color:var(--color-text-tertiary);margin-top:2px}
+.status-dot{width:8px;height:8px;border-radius:50%;position:absolute;top:12px;right:12px}
+.dot-green{background:#639922}.dot-yellow{background:#BA7517}.dot-red{background:#E24B4A}
+.rock-bar-wrap{background:var(--color-background-secondary);border-radius:4px;height:6px;margin:8px 0 4px;overflow:hidden}
+.rock-bar{height:6px;border-radius:4px;transition:width .3s}
+.rock-pct{font-size:11px;color:var(--color-text-secondary)}
+.rock-status{font-size:11px;padding:2px 8px;border-radius:var(--border-radius-md);border:0.5px solid;display:inline-flex;align-items:center;gap:4px;cursor:pointer;background:transparent}
+.rock-on{color:#3B6D11;border-color:#97C459}.rock-at{color:#854F0B;border-color:#EF9F27}.rock-off{color:#A32D2D;border-color:#F09595}
+.avatar{width:28px;height:28px;border-radius:50%;display:inline-flex;align-items:center;justify-content:center;font-size:11px;font-weight:500;background:#CECBF6;color:#3C3489;flex-shrink:0}
+.todo-row{display:flex;align-items:center;gap:10px;padding:8px 0;border-bottom:0.5px solid var(--color-border-tertiary)}
+.todo-row:last-child{border-bottom:none}
+.todo-check{width:16px;height:16px;border-radius:4px;border:1.5px solid var(--color-border-primary);cursor:pointer;flex-shrink:0;display:flex;align-items:center;justify-content:center}
+.todo-check.done{background:#639922;border-color:#639922}
+.todo-text{flex:1;font-size:14px;color:var(--color-text-primary)}
+.todo-text.done-text{text-decoration:line-through;color:var(--color-text-tertiary)}
+.todo-owner{font-size:11px;color:var(--color-text-secondary);flex-shrink:0}
+.todo-rolling{font-size:11px;background:#FAEEDA;color:#633806;padding:2px 7px;border-radius:var(--border-radius-md)}
+.issue-row{display:flex;align-items:flex-start;gap:10px;padding:10px 0;border-bottom:0.5px solid var(--color-border-tertiary)}
+.issue-row:last-child{border-bottom:none}
+.issue-prio{font-size:11px;padding:2px 8px;border-radius:var(--border-radius-md);flex-shrink:0;font-weight:500}
+.prio-high{background:#FCEBEB;color:#791F1F}.prio-med{background:#FAEEDA;color:#633806}.prio-low{background:#F1EFE8;color:#444441}
+.issue-seat{font-size:11px;color:var(--color-text-tertiary);margin-top:3px}
+.saved-tag{font-size:11px;color:var(--color-text-tertiary);opacity:0;transition:opacity .4s;margin-left:8px}
+.saved-tag.show{opacity:1}
+.modal-overlay{display:none;position:fixed;inset:0;background:rgba(0,0,0,.35);z-index:100;align-items:center;justify-content:center}
+.modal-overlay.open{display:flex}
+.modal{background:var(--color-background-primary);border:0.5px solid var(--color-border-secondary);border-radius:var(--border-radius-lg);padding:1.5rem;width:400px;max-width:92vw}
+.modal h3{font-size:16px;font-weight:500;margin-bottom:1rem;color:var(--color-text-primary)}
+.modal label{font-size:13px;color:var(--color-text-secondary);display:block;margin-bottom:4px;margin-top:10px}
+.modal input,.modal select,.modal textarea{width:100%;font-size:14px}
+.modal textarea{height:70px;resize:vertical}
+.modal-footer{display:flex;justify-content:flex-end;gap:8px;margin-top:1.25rem}
+.modal-footer button{font-size:13px;padding:6px 16px;border-radius:var(--border-radius-md);border:0.5px solid var(--color-border-secondary);background:transparent;cursor:pointer;color:var(--color-text-primary)}
+.modal-footer .primary{background:var(--color-text-primary);color:var(--color-background-primary);border-color:var(--color-text-primary)}
+.empty{font-size:13px;color:var(--color-text-tertiary);padding:1.5rem 0;text-align:center}
+select option{background:var(--color-background-primary);color:var(--color-text-primary)}
+.ts{font-size:11px;color:var(--color-text-tertiary)}
+</style>
+
+<h2 class="sr-only">L10 meeting dashboard with persistent storage</h2>
+
+<div class="dash">
+<nav class="nav" id="nav">
+  <button class="active" data-tab="bests">Personal / professional best</button>
+  <button data-tab="metrics">Metrics</button>
+  <button data-tab="headlines">Headlines</button>
+  <button data-tab="rocks">Rocks</button>
+  <button data-tab="todos">To-dos</button>
+  <button data-tab="issues">Issues</button>
+</nav>
+
+<div id="bests" class="section active">
+  <div class="section-header"><span class="section-title">Personal / professional bests</span><span class="section-timer"><i class="ti ti-clock" aria-hidden="true"></i> 5 min</span></div>
+  <button class="add-btn" onclick="openModal('best')"><i class="ti ti-plus" aria-hidden="true"></i> Add best</button>
+  <div id="bests-list" style="margin-top:12px"></div>
+</div>
+
+<div id="metrics" class="section">
+  <div class="section-header"><span class="section-title">Metrics of interest</span><span class="section-timer"><i class="ti ti-clock" aria-hidden="true"></i> 5 min</span></div>
+  <div class="metric-grid" id="metrics-grid"></div>
+  <button class="add-btn" onclick="openModal('metric')"><i class="ti ti-plus" aria-hidden="true"></i> Add metric</button>
+</div>
+
+<div id="headlines" class="section">
+  <div class="section-header"><span class="section-title">Headlines</span><span class="section-timer"><i class="ti ti-clock" aria-hidden="true"></i> 5 min</span></div>
+  <button class="add-btn" onclick="openModal('headline')"><i class="ti ti-plus" aria-hidden="true"></i> Add headline</button>
+  <div id="headlines-list" style="margin-top:12px"></div>
+</div>
+
+<div id="rocks" class="section">
+  <div class="section-header"><span class="section-title">Rocks</span><span class="section-timer"><i class="ti ti-clock" aria-hidden="true"></i> 10 min</span></div>
+  <button class="add-btn" onclick="openModal('rock')"><i class="ti ti-plus" aria-hidden="true"></i> Add rock</button>
+  <div id="rocks-list" style="margin-top:12px"></div>
+</div>
+
+<div id="todos" class="section">
+  <div class="section-header"><span class="section-title">To-dos</span><span class="section-timer"><i class="ti ti-clock" aria-hidden="true"></i> 5 min</span></div>
+  <button class="add-btn" onclick="openModal('todo')"><i class="ti ti-plus" aria-hidden="true"></i> Add to-do</button>
+  <div class="card" style="margin-top:12px"><div id="todos-list"></div></div>
+</div>
+
+<div id="issues" class="section">
+  <div class="section-header"><span class="section-title">Issues</span><span class="section-timer"><i class="ti ti-clock" aria-hidden="true"></i> 15 min</span></div>
+  <button class="add-btn" onclick="openModal('issue')"><i class="ti ti-plus" aria-hidden="true"></i> Add issue</button>
+  <div class="card" style="margin-top:12px"><div id="issues-list"></div></div>
+</div>
+</div>
+
+<div style="margin-top:1rem;padding-top:1rem;border-top:0.5px solid var(--color-border-tertiary);display:flex;align-items:center;justify-content:space-between">
+  <span id="saved-tag" class="saved-tag"><i class="ti ti-check" aria-hidden="true"></i> Saved</span>
+  <span id="last-saved" class="ts"></span>
+</div>
+
+<div class="modal-overlay" id="modal-overlay">
+  <div class="modal">
+    <h3 id="modal-title">Add item</h3>
+    <div id="modal-body"></div>
+    <div class="modal-footer">
+      <button onclick="closeModal()">Cancel</button>
+      <button class="primary" onclick="saveModal()">Add</button>
+    </div>
+  </div>
+</div>
+
+<script>
+const MEMBERS=['Larissa Russell','Alex','Jordan','Morgan','Sam','Pranav Dalvi'];
+const STORAGE_KEY='l10-dashboard-data';
+
+const DEFAULT_DATA={
+  bests:[],
+  metrics:[],
+  headlines:[],
+  rocks:[
+    {title:'Summer staff hired by Memorial Day',owner:'Larissa Russell',pct:0,status:'on',due:'Jul 27'},
+    {title:'TC cafe project completed by 6/15',owner:'Larissa Russell',pct:0,status:'on',due:'Jul 27'},
+  ],
+  todos:[],
+  issues:[]
+};
+
+let data=DEFAULT_DATA;
+let saveTimer=null;
+
+async function loadData(){
+  try{
+    const res=await window.storage.get(STORAGE_KEY);
+    if(res&&res.value){
+      data=JSON.parse(res.value);
+    }
+  }catch(e){
+    data=JSON.parse(JSON.stringify(DEFAULT_DATA));
+  }
+  render();
+  updateLastSaved();
+}
+
+async function saveData(){
+  try{
+    await window.storage.set(STORAGE_KEY,JSON.stringify(data));
+    flashSaved();
+  }catch(e){
+    console.error('Save failed',e);
+  }
+}
+
+function flashSaved(){
+  const tag=document.getElementById('saved-tag');
+  tag.classList.add('show');
+  clearTimeout(saveTimer);
+  saveTimer=setTimeout(()=>tag.classList.remove('show'),2000);
+  updateLastSaved();
+}
+
+function updateLastSaved(){
+  const el=document.getElementById('last-saved');
+  el.textContent='Last saved: '+new Date().toLocaleTimeString([],{hour:'2-digit',minute:'2-digit'});
+}
+
+function ts(){return new Date().toLocaleDateString([],{month:'short',day:'numeric',hour:'2-digit',minute:'2-digit'});}
+function initials(name){return name.split(' ').map(p=>p[0]).join('').toUpperCase().slice(0,2);}
+
+function render(){renderBests();renderMetrics();renderHeadlines();renderRocks();renderTodos();renderIssues();}
+
+function renderBests(){
+  const el=document.getElementById('bests-list');
+  if(!data.bests.length){el.innerHTML='<p class="empty">No bests added yet</p>';return;}
+  el.innerHTML=data.bests.map((b,i)=>`
+    <div class="card"><div class="card-row"><div class="card-main">
+      <span class="badge ${b.type==='professional'?'badge-pro':'badge-per'}">${b.type==='professional'?'Professional':'Personal'}</span>
+      <p class="card-text" style="margin-top:6px">${b.text}</p>
+      <p class="card-meta">${b.who} &middot; <span class="ts">${b.addedAt||''}</span></p>
+    </div><button class="delete-btn" onclick="del('bests',${i})" aria-label="Remove"><i class="ti ti-x" aria-hidden="true"></i></button></div></div>`).join('');
+}
+
+function renderMetrics(){
+  const el=document.getElementById('metrics-grid');
+  if(!data.metrics.length){el.innerHTML='<p class="empty">No metrics added yet</p>';return;}
+  el.innerHTML=data.metrics.map((m,i)=>`
+    <div class="metric-card" style="cursor:pointer" onclick="editMetricStatus(${i})">
+      <div class="status-dot dot-${m.status}"></div>
+      <p class="metric-label">${m.label}</p>
+      <p class="metric-value">${m.value}</p>
+      <p class="metric-target">Target: ${m.target}</p>
+      <p class="ts" style="margin-top:4px">${m.updatedAt||''}</p>
+    </div>`).join('');
+}
+
+function editMetricStatus(i){
+  const s=['green','yellow','red'];
+  data.metrics[i].status=s[(s.indexOf(data.metrics[i].status)+1)%3];
+  data.metrics[i].updatedAt=ts();
+  saveData();renderMetrics();
+}
+
+function renderHeadlines(){
+  const el=document.getElementById('headlines-list');
+  if(!data.headlines.length){el.innerHTML='<p class="empty">No headlines yet</p>';return;}
+  el.innerHTML=data.headlines.map((h,i)=>`
+    <div class="card"><div class="card-row"><div class="card-main">
+      <span class="badge badge-${h.sentiment==='positive'?'pos':h.sentiment==='negative'?'neg':'neu'}">${h.sentiment}</span>
+      <p class="card-text" style="margin-top:6px">${h.text}</p>
+      <p class="card-meta">${h.who} &middot; <span class="ts">${h.addedAt||''}</span></p>
+    </div><button class="delete-btn" onclick="del('headlines',${i})" aria-label="Remove"><i class="ti ti-x" aria-hidden="true"></i></button></div></div>`).join('');
+}
+
+function renderRocks(){
+  const el=document.getElementById('rocks-list');
+  if(!data.rocks.length){el.innerHTML='<p class="empty">No rocks added yet</p>';return;}
+  const colors={on:'#639922',at:'#BA7517',off:'#E24B4A'};
+  const grouped={};
+  data.rocks.forEach((r,i)=>{if(!grouped[r.owner])grouped[r.owner]=[];grouped[r.owner].push({...r,idx:i});});
+  el.innerHTML=Object.entries(grouped).map(([owner,rocks])=>`
+    <div style="margin-bottom:1.25rem">
+      <div style="display:flex;align-items:center;gap:8px;margin-bottom:8px">
+        <div class="avatar">${initials(owner)}</div>
+        <span style="font-size:14px;font-weight:500;color:var(--color-text-primary)">${owner}</span>
+        <span style="font-size:12px;color:var(--color-text-tertiary)">${rocks.length} rock${rocks.length!==1?'s':''}</span>
+      </div>
+      ${rocks.map(r=>`
+        <div class="card" style="margin-left:36px">
+          <div class="card-row"><div class="card-main">
+            <p class="card-text" style="font-weight:500">${r.title}</p>
+            <div style="display:flex;align-items:center;gap:8px;margin:6px 0 2px">
+              <input type="range" min="0" max="100" value="${r.pct}" step="5"
+                style="flex:1;height:4px"
+                oninput="updateRockPct(${r.idx},this.value)"
+                onchange="saveData()">
+              <span style="font-size:12px;font-weight:500;color:var(--color-text-primary);min-width:32px">${r.pct}%</span>
+            </div>
+            <div class="rock-bar-wrap" style="display:none"><div class="rock-bar" style="width:${r.pct}%;background:${colors[r.status]}"></div></div>
+            <div style="display:flex;align-items:center;justify-content:space-between;margin-top:4px">
+              <span class="ts">${r.due?'Due '+r.due:''}${r.updatedAt?' &middot; Updated '+r.updatedAt:''}</span>
+              <button class="rock-status rock-${r.status}" onclick="cycleRock(${r.idx})">${r.status==='on'?'On track':r.status==='at'?'At risk':'Off track'}</button>
+            </div>
+          </div>
+          <button class="delete-btn" onclick="del('rocks',${r.idx})" aria-label="Remove"><i class="ti ti-x" aria-hidden="true"></i></button></div>
+        </div>`).join('')}
+    </div>`).join('');
+}
+
+function updateRockPct(i,val){
+  data.rocks[i].pct=parseInt(val);
+  data.rocks[i].updatedAt=ts();
+  const labels=document.querySelectorAll(`[oninput="updateRockPct(${i},this.value)"]`);
+  labels.forEach(el=>{
+    const span=el.nextElementSibling;
+    if(span)span.textContent=val+'%';
+  });
+}
+
+function renderTodos(){
+  const el=document.getElementById('todos-list');
+  if(!data.todos.length){el.innerHTML='<p class="empty">No to-dos yet</p>';return;}
+  el.innerHTML=data.todos.map((t,i)=>`
+    <div class="todo-row">
+      <div class="todo-check ${t.done?'done':''}" onclick="toggleTodo(${i})" role="checkbox" aria-checked="${t.done}">
+        ${t.done?'<i class="ti ti-check" style="font-size:11px;color:#fff" aria-hidden="true"></i>':''}
+      </div>
+      <div style="flex:1;min-width:0">
+        <span class="todo-text ${t.done?'done-text':''}">${t.text}</span>
+        <span class="ts" style="display:block">${t.owner}${t.addedAt?' &middot; '+t.addedAt:''}</span>
+      </div>
+      ${t.rolling?'<span class="todo-rolling">rolling</span>':''}
+      <button class="delete-btn" onclick="del('todos',${i})" aria-label="Remove"><i class="ti ti-x" aria-hidden="true"></i></button>
+    </div>`).join('');
+}
+
+function renderIssues(){
+  const el=document.getElementById('issues-list');
+  if(!data.issues.length){el.innerHTML='<p class="empty">No issues yet</p>';return;}
+  el.innerHTML=data.issues.map((iss,i)=>`
+    <div class="issue-row">
+      <span class="issue-prio prio-${iss.priority}">${iss.priority}</span>
+      <div style="flex:1;min-width:0">
+        <p class="card-text">${iss.text}</p>
+        <p class="issue-seat">Seat: ${iss.seat} &middot; <span class="ts">${iss.addedAt||''}</span></p>
+      </div>
+      <button class="delete-btn" onclick="del('issues',${i})" aria-label="Remove"><i class="ti ti-x" aria-hidden="true"></i></button>
+    </div>`).join('');
+}
+
+function del(section,i){data[section].splice(i,1);saveData();render();}
+function toggleTodo(i){data.todos[i].done=!data.todos[i].done;saveData();renderTodos();}
+function cycleRock(i){const s=['on','at','off'];data.rocks[i].status=s[(s.indexOf(data.rocks[i].status)+1)%3];data.rocks[i].updatedAt=ts();saveData();renderRocks();}
+
+let currentModal='';
+const modalForms={
+  best:`<label>Type</label><select id="m-type"><option value="professional">Professional</option><option value="personal">Personal</option></select><label>Best this week</label><textarea id="m-text" placeholder="Describe the win..."></textarea><label>Team member</label><select id="m-who">${MEMBERS.map(m=>`<option>${m}</option>`).join('')}</select>`,
+  metric:`<label>Metric name</label><input id="m-label" placeholder="e.g. MRR"><label>Current value</label><input id="m-value" placeholder="e.g. $24,800"><label>Target</label><input id="m-target" placeholder="e.g. $25k"><label>Status</label><select id="m-status"><option value="green">Green — on track</option><option value="yellow">Yellow — watch</option><option value="red">Red — issue</option></select>`,
+  headline:`<label>Sentiment</label><select id="m-sentiment"><option value="positive">Positive</option><option value="negative">Negative</option><option value="neutral">Neutral</option></select><label>Headline</label><textarea id="m-text" placeholder="Describe the headline..."></textarea><label>Reported by</label><select id="m-who">${MEMBERS.map(m=>`<option>${m}</option>`).join('')}</select>`,
+  rock:`<label>Rock / milestone</label><input id="m-title" placeholder="e.g. Launch v2 of mobile app"><label>Owner</label><select id="m-owner">${MEMBERS.map(m=>`<option>${m}</option>`).join('')}</select><label>% complete</label><input id="m-pct" type="number" min="0" max="100" value="0"><label>Due date</label><input id="m-due" type="text" placeholder="e.g. Jul 27"><label>Status</label><select id="m-status"><option value="on">On track</option><option value="at">At risk</option><option value="off">Off track</option></select>`,
+  todo:`<label>To-do</label><input id="m-text" placeholder="Describe the task"><label>Owner</label><select id="m-who">${MEMBERS.map(m=>`<option>${m}</option>`).join('')}</select><label>Rolling item?</label><select id="m-rolling"><option value="no">No</option><option value="yes">Yes — carry forward</option></select>`,
+  issue:`<label>Issue / opportunity</label><textarea id="m-text" placeholder="Describe the issue or opportunity..."></textarea><label>Seat / area</label><input id="m-seat" placeholder="e.g. Sales, Product, Ops"><label>Priority</label><select id="m-priority"><option value="high">High</option><option value="medium">Medium</option><option value="low">Low</option></select>`,
+};
+const modalTitles={best:'Add personal / professional best',metric:'Add metric',headline:'Add headline',rock:'Add rock',todo:'Add to-do',issue:'Add issue / opportunity'};
+
+function openModal(type){currentModal=type;document.getElementById('modal-title').textContent=modalTitles[type];document.getElementById('modal-body').innerHTML=modalForms[type];document.getElementById('modal-overlay').classList.add('open');}
+function closeModal(){document.getElementById('modal-overlay').classList.remove('open');currentModal='';}
+
+function saveModal(){
+  const v=id=>{const el=document.getElementById(id);return el?el.value.trim():''};
+  const now=ts();
+  if(currentModal==='best'){if(!v('m-text'))return;data.bests.unshift({type:v('m-type'),text:v('m-text'),who:v('m-who'),addedAt:now});}
+  else if(currentModal==='metric'){if(!v('m-label'))return;data.metrics.push({label:v('m-label'),value:v('m-value'),target:v('m-target'),status:v('m-status'),updatedAt:now});}
+  else if(currentModal==='headline'){if(!v('m-text'))return;data.headlines.unshift({sentiment:v('m-sentiment'),text:v('m-text'),who:v('m-who'),addedAt:now});}
+  else if(currentModal==='rock'){if(!v('m-title'))return;data.rocks.push({title:v('m-title'),owner:v('m-owner'),pct:parseInt(v('m-pct'))||0,status:v('m-status'),due:v('m-due'),updatedAt:now});}
+  else if(currentModal==='todo'){if(!v('m-text'))return;data.todos.push({text:v('m-text'),owner:v('m-who'),done:false,rolling:v('m-rolling')==='yes',addedAt:now});}
+  else if(currentModal==='issue'){if(!v('m-text'))return;data.issues.push({text:v('m-text'),seat:v('m-seat')||'General',priority:v('m-priority'),addedAt:now});}
+  closeModal();saveData();render();
+}
+
+document.getElementById('nav').addEventListener('click',e=>{
+  const btn=e.target.closest('button');if(!btn)return;
+  document.querySelectorAll('.nav button').forEach(b=>b.classList.remove('active'));
+  document.querySelectorAll('.section').forEach(s=>s.classList.remove('active'));
+  btn.classList.add('active');document.getElementById(btn.dataset.tab).classList.add('active');
+});
+document.getElementById('modal-overlay').addEventListener('click',e=>{if(e.target===e.currentTarget)closeModal();});
+
+loadData();
+</script>
